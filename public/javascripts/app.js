@@ -4,13 +4,13 @@ var config = {
      * Note: it's only needed for the graph intervals, doesn't set the logging interval.
      * You have to edit your crontab for that.
      */
-    measurementInterval: 30,
+    measurementInterval: 10,
 
     /**
      * fahrenheit or celsius
      * If you change this to fahrenheit, make sure you change the color zones below as well!
      */
-    unit: 'celsius',
+    unit: 'fahrenheit',
 
     /**
      * Coordinates for getting outside weather data from darksky.net
@@ -19,9 +19,9 @@ var config = {
      *
      * You can disable geolocation and provide coordinates if you want.
      */
-    useGeoLocation: true,
-    latitude: 47.51,
-    longitude: 19.09,
+    useGeoLocation: false,
+    latitude: 37.5545,
+    longitude: -122.3229,
 
     /**
      * Color zones for the graph lines.
@@ -29,21 +29,21 @@ var config = {
      * The number means the upper bound of the interval.
      * 
      * Default values and meanings:
-     * Low (yellow)......: 0-21
-     * Medium (orange)...: 21-25
-     * High (red)........: 26-99
+     * Low (yellow)......: 0-21 C     0-69.8 F
+     * Medium (orange)...: 21-25 C    69.8-77 F
+     * High (red)........: 26-99 C    77-210.2 F 
      */
     zones: {
-        low: 21,
-        med: 25,
-        high: 99
+        low: 69.8,
+        med: 77,
+        high: 210.2
     },
 
     /**
      * Dark Sky API key.
      * Please don't abuse this. Be a good guy and request your own at https://darksky.net/dev
      */
-    APIKey: '262d0436a1b2d47e7593f0bb41491b64',
+    APIKey: '34549d74098e121e59a359712a1a4746',
 
     // Limits of the night plotband (the gray area on the graphs)
     nightStart: 0,
@@ -75,14 +75,14 @@ var globalHighchartsOptions = {
     },
     yAxis: [{
         title: {
-            text: 'Temperature (°C)',
+            text: 'Temperature (°F)',
             margin: 5,
             style: {
                 fontWeight: 'bold'
             }
         },
         opposite: true,
-        tickInterval: config.unit === 'celsius' ? 1 : 10
+        tickInterval: config.unit === 'fahrenheit' ? 1 : 10
     },
     {
         title: {
@@ -106,7 +106,7 @@ var globalHighchartsOptions = {
                 enabled: false
             },
             tooltip: {
-                valueSuffix: '°C'
+                valueSuffix: '°F'
             },
             color: '#F18324',
             zones: [{
@@ -262,7 +262,7 @@ function loadDoubleChart(APICall, DOMtarget, moreOptions) {
                 enabled: false
             },
             tooltip: {
-                valueSuffix: '°C'
+                valueSuffix: '°F'
             },
             color: '#F18324',
             zones: [{
@@ -434,7 +434,7 @@ function loadOutsideWeather() {
             $('#curr-hum-outside').text((json.currently.humidity*100).toFixed() + '%');
 
             $('#forecast-summary').text(json.hourly.summary);
-            $('#forecast-link').attr('href', 'http://darksky.net/#/f/' +
+            $('#forecast-link').attr('href', 'http://darksky.net/forecast/' +
                 config.latitude + ',' + config.longitude);
         });
 }
@@ -582,6 +582,7 @@ $(document).ready(function() {
         config.loadedCharts = [ ];
 
         loadOutsideWeather();
+	loadCurrentData(); // added since it didn't fire by chartComplete()
         loadDoubleChart('/api/compare/today/yesterday', '#chart-today-vs');
         loadChart('/api/past/week', '#chart-past');
         // loadCurrentData() is fired by chartComplete()
